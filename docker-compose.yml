@@ -6,29 +6,36 @@ services:
     networks:
       appnet:
         ipv4_address: 10.100.11.11
+    environment:
+      - ORIGIN=http://10.100.11.12:80
     restart: unless-stopped
 
   nginx:
     container_name: nginx
     build:
       context: ./nginx
-    # volumes:
-    #   - /etc/nginx/vhost.d
-    #   - /etc/acme.sh
-    #   - /usr/share/nginx/html
-    #   - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - "80:80"
     networks:
       appnet:
         ipv4_address: 10.100.11.12
     restart: unless-stopped
-#   db:
-#     image: mongo
-#     command:
-#     networks:
-#       dbnet:
-#         ipv4_address: 10.100.12.12
+
+  db:
+    container_name: mongodb
+    build:
+      context: ./db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongouser
+      - MONGO_INITDB_ROOT_PASSWORD=mongopasswd
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+    networks:
+      appnet:
+        ipv4_address: 10.100.11.13
+
 networks:
   appnet:
     driver: bridge
