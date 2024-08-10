@@ -5,6 +5,7 @@ FROM node:22.4 as builder
 WORKDIR /usr/src/app
 # copy the package.json files from local machine to the workdir in container
 COPY package*.json ./
+# COPY .env_docker ./
 # run npm install in our local machine
 RUN npm ci
 # copy the generated modules and all other files to the container
@@ -19,11 +20,12 @@ FROM node:22.4-alpine3.20
 WORKDIR /app
 # copy files from previous step
 COPY --from=builder /usr/src/app/build/ ./build/
-COPY --from=builder /usr/src/app/package.json .
+COPY --from=builder /usr/src/app/package.json ./
+COPY .env_docker ./
 COPY --from=builder /usr/src/app/node_modules/ ./node_modules/
 # our app is running on port 3000 within the container, so need to expose it
 EXPOSE 3000
 
 # the command that starts our app
-CMD ["node", "build"]
+CMD ["node", "--env-file=.env_docker", "build"]
 # ENTRYPOINT /bin/sh

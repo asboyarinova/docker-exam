@@ -1,11 +1,34 @@
 services:
+  db:
+    container_name: mongodb
+    build:
+      context: ./db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongouser
+      MONGO_INITDB_ROOT_PASSWORD: mongopasswd
+      MONGO_INITDB_DATABASE: app
+    # ports:
+    #   - "27017:27017"
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
+    networks:
+      dbnet:
+        ipv4_address: 10.100.12.13
+
   app:
     container_name: app
     build:
       context: ./app
+    depends_on:
+      db:
+        condition: service_started
     networks:
       appnet:
         ipv4_address: 10.100.11.11
+      dbnet:
+        ipv4_address: 10.100.12.12
     environment:
       - ORIGIN=http://10.100.11.12:80
     restart: unless-stopped
@@ -21,29 +44,14 @@ services:
         ipv4_address: 10.100.11.12
     restart: unless-stopped
 
-  db:
-    container_name: mongodb
-    build:
-      context: ./db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=mongouser
-      - MONGO_INITDB_ROOT_PASSWORD=mongopasswd
-    volumes:
-      - type: bind
-        source: ./data
-        target: /data/db
-    networks:
-      appnet:
-        ipv4_address: 10.100.11.13
-
 networks:
   appnet:
     driver: bridge
     ipam:
       config:
         - subnet: 10.100.11.0/24
-#   dbnet:
-#     driver: bridge
-#     ipam:
-#       config:
-#         - subnet 10.100.12.0/24
+  dbnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.100.12.0/24
