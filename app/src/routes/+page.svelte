@@ -1,6 +1,6 @@
 <script>
-	import { Badge, Button, Card, Heading, Hr, Li, List, Modal, P, Radio, Rating, Textarea } from 'flowbite-svelte';
-	import { CheckCircleSolid} from 'flowbite-svelte-icons';
+	import { Badge, Button, Card, Hr, Li, List, Modal, P, Radio, Rating, Textarea } from 'flowbite-svelte';
+	import { CheckCircleSolid } from 'flowbite-svelte-icons';
 	import { reviewsStore } from "../stores";
 	import { invalidateAll } from '$app/navigation';
 
@@ -13,6 +13,10 @@
 	}
 
 	async function handleSaveReview() {
+		if(currentRating < 5) {
+			alert('Оценка ниже 5 не приветствуется')
+			return
+		}
 		const res = await fetch('/api/v1/reviews', {
 			method: 'POST',
 			headers: {
@@ -54,7 +58,7 @@
 				</Li>
 				<Li icon>
 					<CheckCircleSolid class="w-5 h-5 me-2 text-green-500 dark:text-green-400" />
-					с приложением (sveltekit) в обеих подсетях
+					с sveltekit приложением, которое предварительно собирается в отдельном контейнере, в обеих подсетях
 				</Li>
 			</List>
 			<Hr classHr="w-48 h-1 mx-auto my-4 rounded md:my-6" />
